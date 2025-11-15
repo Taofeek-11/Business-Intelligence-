@@ -1,0 +1,381 @@
+
+Basic Metrics:
+
+Total Customer = 
+// Return Distinct Count of Customer 
+ DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID])
+
+Total Order = 
+//Returns Distinct Count of Order 
+DISTINCTCOUNT('Sample - Superstore - Copy'[Order ID])
+
+Total Revenue = 
+// Returns Total Sales 
+SUM('Sample - Superstore - Copy'[Sales])
+
+Total Cost =
+ //Returns Total Cost (Shipping, Discount, product cost)
+ ('Sample - Superstore - Copy'[Sales]) - ('Sample - Superstore - Copy'[Profit])
+
+Gross Profit Margin = 
+ //Returns Gross Profit Margin 
+DIVIDE('Sample - Superstore - Copy'[Total profit],'Sample - Superstore - Copy'[Total Revenue])
+
+Shipping Cost = 
+  //Returns shipping cost for each category (Furniture – 6% of Sales, Technology - 3% of Sales, Office Supplies – 2% of Sales)
+ IF('Sample - Superstore - Copy'[Category] = "Furniture", 'Sample - Superstore - Copy'[Sales] * 0.06,
+IF('Sample - Superstore - Copy'[Category] = "Technology", 'Sample - Superstore - Copy'[Sales] * 0.03, 
+'Sample - Superstore - Copy'[Sales] * 0.02)
+)
+
+Discount = 
+//Returns Discount Value of Each Product (Discount% Ranges from 0-80% of Product Amount) 
+'Sample - Superstore - Copy'[Discount%] * 'Sample - Superstore - Copy'[Sales]
+
+
+Financial Metric
+Discount Calculations
+
+Discount Category = 
+  // Returns the category of Discount (Discount Ranges from 0-80%; it is categorized to 3 sections (Low – 0-20%, Medium – 30-45%, High – 50-80%) 
+IF('Sample - Superstore - Copy'[Discount%] <= 0.2, "Low (0-20%)", IF('Sample - Superstore - Copy'[Discount%] <=0.45,"Medium (30-45%)", "High (50-80%)" ))
+
+
+Order Calculation
+Total Order
+Total Order (Discount)
+
+Total order (Low Discount) = 
+//Returns Total Order with Low Discount
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Discount Category]= "Low (0-20%)")
+
+Total order (Medium Discount) = 
+//Returns Total Order with Medium Discount
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Discount Category]= "Medium (30-45%)")
+
+Total order (Medium Discount) = 
+//Returns Total Order with High Discount
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Discount Category]= "High (50-80%)")
+
+Total Order (Region)
+
+Total order (Central) = 
+//Returns Total Order made from Central
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Region] = "Central")
+
+Total order (West) = 
+//Returns Total Order made from West
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Region] = "West")
+
+Total order (East) = 
+//Returns Total Order made from East
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Region] = "East")
+
+Total order (South) = 
+//Returns Total Order made from South
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Region] = "South")
+
+Total Order (Product Category)
+
+Total order (Furniture) = 
+//Returns Total Order of Furniture
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Category]= "Furniture")
+
+Total order (Technology) = 
+//Returns Total Order of Technology
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Category]= "Technology")
+
+Total order (Office Supplies) = 
+//Returns Total Order of Office Supplies
+CALCULATE('Sample - Superstore - Copy'[Total Order], 'Sample - Superstore - Copy'[Category]= "Office Supplies")
+
+Percent of Order made
+Percent of Order made (Discount)
+% Order of Low Discount Product = 
+ //Returns Percentage Orders of Low Discount Product 
+ DIVIDE('Sample - Superstore - Copy'[Total order (Low Discount)],'Sample - Superstore - Copy'[Total Order])
+
+% Order of Medium Discount Product = 
+ //Returns Percentage Orders of Medium Discount Product 
+ DIVIDE('Sample - Superstore - Copy'[Total order (Medium Discount)],'Sample - Superstore - Copy'[Total Order])
+
+% Order of High Discount Product = 
+ //Returns Percentage Orders of High Discount Product 
+ DIVIDE('Sample - Superstore - Copy'[Total order (High Discount)],'Sample - Superstore - Copy'[Total Order])
+
+
+Customer Calculation
+Total Customer (Discount)
+Total Customer (Low Discount) = 
+//Returns Total Number of Customer that buy Products of Low Discount
+CALCULATE('Sample - Superstore - Copy'[Total Customer], 'Sample - Superstore - Copy'[Discount Category] = "Low (0-20%)")
+
+Total Customer (Medium Discount) = 
+//Returns Total Number of Customer that buy Products of Medium Discount
+CALCULATE('Sample - Superstore - Copy'[Total Customer], 'Sample - Superstore - Copy'[Discount Category] = "Medium (30-45%)")
+
+Total Customer (High Discount) = 
+//Returns Total Number of Customer that buy Products of High Discount
+CALCULATE('Sample - Superstore - Copy'[Total Customer], 'Sample - Superstore - Copy'[Discount Category] = "High (50-80%)")
+
+Total Customer (RFM Segment)
+Total Customer (Potential) = 
+//Returns Total Number of Customer under “Potential” Category 
+CALCULATE('Sample - Superstore - Copy'[Total Customer], 'Customer Summary'[RFM Segment] = "Potential")
+
+Total Customer (At Risk) = 
+//Returns Total Number Customer under “At Risk” Category 
+CALCULATE('Sample - Superstore - Copy'[Total Customer], 'Customer Summary'[RFM Segment] = "At Risk")
+
+Total Customer (Champion & Loyal) = 
+//Returns Total Number of Customer under “Champion & Loyal” Categories
+CALCULATE('Sample - Superstore - Copy'[Total Customer], 'Customer Summary'[RFM Segment] in {"Champion", "Loyal"})
+
+Customer Segment Performance
+RCG = 
+// Returns Revenue Growth rate with color code icon 
+[YoY] & "%" &" " & IF([YoY]>=1, "✅", IF([YoY]<0, "❌", "⚠️"))
+
+CLV = 
+// Returns Customer Lifetime Value
+SUMX(
+    VALUES('Sample - Superstore - Copy'[Customer ID]),
+    VAR CustomerSales = CALCULATE(SUM('Sample - Superstore - Copy'[Sales]))
+    VAR CustomerOrders = CALCULATE(DISTINCTCOUNT('Sample - Superstore - Copy'[Order ID]))
+    VAR FirstOrder = CALCULATE(MIN('Sample - Superstore - Copy'[Order Date]))
+    VAR LastOrder = CALCULATE(MAX('Sample - Superstore - Copy'[Order Date]))
+    VAR CustomerLifespan = DATEDIFF(FirstOrder, LastOrder, DAY) / 365
+    VAR AvgOrderValue = DIVIDE(CustomerSales, CustomerOrders, 0)
+    
+    RETURN 
+        IF(CustomerLifespan > 0,
+            AvgOrderValue * CustomerOrders / CustomerLifespan * CustomerLifespan,
+            CustomerSales )
+)
+
+
+AOV = 
+//Returns Average Order Value 
+DIVIDE(
+    sum('Sample - Superstore - Copy'[Sales]),
+    DISTINCTCOUNT('Sample - Superstore - Copy'[Order ID]), 0)
+
+
+Frequency = 
+// Returns Average Order By Customer 
+DIVIDE(
+    COUNTROWS('Sample - Superstore - Copy'),
+    DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID])
+)
+
+Retention = --- Double Check: the formular is generated by GenAI
+//Returns Customer retention rate
+VAR PriorPeriodCustomers = 
+    CALCULATE(
+        DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID]),
+        DATESINPERIOD(
+            'Sample - Superstore - Copy'[Order Date],
+            MAX('Sample - Superstore - Copy'[Order Date]) - 365,
+            365,
+            DAY
+        )
+    )
+VAR CurrentPeriodCustomers = 
+    CALCULATE(
+        DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID]),
+        DATESINPERIOD(
+            'Sample - Superstore - Copy'[Order Date],
+            MAX('Sample - Superstore - Copy'[Order Date]),
+            365,
+            DAY
+        )
+    )
+
+VAR ReturnedCustomers = --- Double Check: the formular is generated by GenAI
+    CALCULATE(
+        DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID]),
+        FILTER(
+            VALUES('Sample - Superstore - Copy'[Customer ID]),
+            AND(
+                CALCULATE(
+                    COUNTROWS('Sample - Superstore - Copy'),
+                    DATESINPERIOD(
+                        'Sample - Superstore - Copy'[Order Date],
+                        MAX('Sample - Superstore - Copy'[Order Date]) - 365,
+                        365,
+                        DAY
+                    )
+                ) > 0,
+                CALCULATE(
+                    COUNTROWS('Sample - Superstore - Copy'),
+                    DATESINPERIOD(
+                        'Sample - Superstore - Copy'[Order Date],
+                        MAX('Sample - Superstore - Copy'[Order Date]),
+                        365,
+                        DAY
+                    )
+                ) > 0
+            )
+        )
+    )
+RETURN
+    DIVIDE(ReturnedCustomers, PriorPeriodCustomers, 0) * 100
+
+Repeat Customers = 
+CALCULATE(
+    DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID]),
+    FILTER(
+        VALUES('Sample - Superstore - Copy'[Customer ID]),
+        CALCULATE(COUNTROWS('Sample - Superstore - Copy')) > 1
+    )
+)
+
+One-Time Customers = --- Double Check: the formular is generated by GenAI
+CALCULATE(
+    DISTINCTCOUNT('Sample - Superstore - Copy'[Customer ID]),
+    FILTER(
+        VALUES('Sample - Superstore - Copy'[Customer ID]),
+        CALCULATE(COUNTROWS('Sample - Superstore - Copy')) = 1
+    )
+)
+
+Recency Score = --- Double Check: the formular is generated by GenAI
+VAR DaysSinceLastOrder = 
+    DATEDIFF(
+        MAX('Sample - Superstore - Copy'[Order Date]),
+        TODAY(),
+        DAY
+    )
+VAR RecencyQuintiles = 
+    PERCENTILE.INC(DaysSinceLastOrder, {0.2, 0.4, 0.6, 0.8})
+RETURN
+    SWITCH(
+        TRUE(),
+        DaysSinceLastOrder <= RecencyQuintiles[1], 5,
+        DaysSinceLastOrder <= RecencyQuintiles[2], 4,
+        DaysSinceLastOrder <= RecencyQuintiles[3], 3,
+        DaysSinceLastOrder <= RecencyQuintiles[4], 2,
+        1
+    )
+
+Revenue Calculations
+Revenue (Region)
+Revenue (Central) = 
+ //Returns Revenue Generated in Central Region
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Region] = "Central")
+
+Revenue (West) =
+//Returns Revenue Generated in West Region
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Region] = "West")
+
+Revenue (East) =
+//Returns Revenue Generated in East Region
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Region] = "East")
+
+Revenue (South) =
+//Returns Revenue Generated in South Region
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Region] = "South")
+
+
+Revenue (Product Category)
+Revenue (Technology) = 
+//Returns Revenue Generated by Technology Category
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Category] = "Technology")
+
+Revenue (Office Supplies) = 
+//Returns Revenue Generated by Office Supplies Category
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Category] = "Office Supplies")
+
+Revenue (Furniture) = 
+//Returns Revenue Generated by Furniture Category
+CALCULATE('Sample - Superstore - Copy'[Revenue], 'Sample - Superstore - Copy'[Category] = "Furniture")
+
+Cost Calculations
+Shipping Cost (Region) 
+Total Shipping Cost (Central) = 
+//Returns Total Shipping Cost for Central Region
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Region] = "Central")
+
+Total Shipping Cost (South) = 
+//Returns Total Shipping Cost for South Region
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Region] = "South")
+
+Total Shipping Cost (East) = 
+//Returns Total Shipping Cost for East Region
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Region] = "East")
+
+Total Shipping Cost (West) = 
+//Returns Total Shipping Cost for West Region
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Region] = "West")
+
+Shipping Cost (Product Category)
+Total Shipping Cost (Furniture) = 
+//Returns Total Shipping Cost for Furniture
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Category] = "Furniture")
+
+Total Shipping Cost (Technology) = 
+//Returns Total Shipping Cost for Technology
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Category] = "Technology")
+
+Total Shipping Cost (Office Supplies) = 
+//Returns Total Shipping Cost for Office Supplies
+CALCULATE('Sample - Superstore - Copy'[Total Shipping Cost], 'Sample - Superstore - Copy'[Category] = "Office Supplies")
+
+
+Shipping cost/Order (Region)
+Shipping cost/Order (Central) = 
+//Returns Shipping cost per order placed in Central Region
+DIVIDE('Sample - Superstore - Copy'[Shipping cost (Central)], 'Sample - Superstore - Copy'[Total order (Central)])
+
+Shipping cost/Order (West) = 
+//Returns Shipping cost per order in West Region
+DIVIDE('Sample - Superstore - Copy'[Shipping cost (West)], 'Sample - Superstore - Copy'[Total order (West)])
+
+Shipping cost/Order (East) = 
+//Returns Shipping cost per order in East Region
+DIVIDE('Sample - Superstore - Copy'[Shipping cost (East)], 'Sample - Superstore - Copy'[Total order (East)])
+
+Shipping cost/Order (South) = 
+//Returns Shipping cost per order in South Region
+DIVIDE('Sample - Superstore - Copy'[Shipping cost (South)], 'Sample - Superstore - Copy'[Total order (South)])
+
+Shipping cost/Order (Product Category)
+Shipping cost/Order (Furniture) = 
+//Returns Shipping cost for Furniture per order
+DIVIDE('Sample - Superstore - Copy'[Total Shipping Cost (Furniture)],'Sample - Superstore - Copy'[Total order (Furniture)])
+
+Shipping cost/Order (Technology) = 
+//Returns Shipping cost for Furniture per order
+DIVIDE('Sample - Superstore - Copy'[Total Shipping Cost (Technology)],'Sample - Superstore - Copy'[Total order (Technology)])
+
+Shipping cost/Order (Office Supplies) = 
+//Returns Shipping cost for Furniture per order
+DIVIDE('Sample - Superstore - Copy'[Total Shipping Cost (Office Supplies)],'Sample - Superstore - Copy'[Total order (Office Supplies)])
+
+Profit Calculations
+Gross Profit Discount = 
+// Returns GPM For Discount
+'Sample - Superstore - Copy'[Discount%] * 'Sample - Superstore - Copy'[Sales]
+Gross Profit Margin (Product Category)
+Gross Profit Margin (Furniture) = 
+// Returns GPM For Furniture
+CALCULATE('Sample - Superstore - Copy'[Gross Profit Margin], 'Sample - Superstore - Copy'[Category] = "Furniture")
+
+Gross Profit Margin (Technology) = 
+// Returns GPM For Technology
+CALCULATE('Sample - Superstore - Copy'[Gross Profit Margin], 'Sample - Superstore - Copy'[Category] = "Technology")
+
+Gross Profit Margin (Office Supplies) = 
+// Returns GPM For Office Supplies
+CALCULATE('Sample - Superstore - Copy'[Gross Profit Margin], 'Sample - Superstore - Copy'[Category] = "Office Supplies")
+
+
+YoY = 
+ //Returns Year over Year profit (profit growth)
+ ROUND(
+    DIVIDE(
+        [Profit] - PREVIOUS([Profit]),
+        PREVIOUS([Profit])
+    ),
+2)
+
